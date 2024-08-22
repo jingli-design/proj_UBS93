@@ -2,7 +2,7 @@ library(readr)
 library(org.Hs.eg.db)
 library(clusterProfiler)
 load("Pro_TNBC/data/CCLE/CCLE.RData")
-
+load("Pro_TNBC/paper/data/results/section_1/UBS93.gene.df")
 ####calculate the centroid matrix of the UBS93 gene set using median####
 ccle_info         <- read.csv("Pro_TNBC/data/CCLE/ccle_info.csv")
 brca_meta         <- CCLE.sample.meta[CCLE.sample.meta$cell.line.tumor.site=="BREAST",]
@@ -25,6 +25,9 @@ Basal$Claudin_low               <- apply(brcaccle_UBS93_rpkm_rank[rownames(brcac
 Basal$H_or_L                    <- apply(brcaccle_UBS93_rpkm_rank[rownames(brcaccle_UBS93_rpkm_rank) %in% nonbasal.ccle.id,],2,median)
 UBS93_median_centriod                  <- Basal
 colnames(UBS93_median_centriod)[1]     <- "Basal"
-save(UBS93_median_centriod ,file="Pro_TNBC/output/data/CCLE/UBS93_median_centriod.RData")
+save(UBS93_median_centriod,file="Pro_TNBC/paper/data/method/UBS93_median_centriod.RData")
+
+
+
 
 
