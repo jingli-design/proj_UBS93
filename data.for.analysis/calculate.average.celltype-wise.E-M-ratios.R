@@ -5,7 +5,6 @@
 library(Matrix)
 library(Seurat)
 library(dplyr)
-library(patchwork)
 library(readr)
 
 ####1.create seurat object####
