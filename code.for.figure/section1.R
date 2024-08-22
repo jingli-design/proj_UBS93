@@ -4,17 +4,38 @@ library(ggplot2)
 library(dplyr)
 library(org.Hs.eg.db)
 library(clusterProfiler)
+library(Seurat)
 source('Pro_TNBC/paper/code/ggplot.style.R')
 
 load("Pro_TNBC/data/CCLE/CCLE.RData")
 load("Pro_TNBC/output/data/CCLE/UBS93.Rpackage/UBS93.gene.df.RData")
-
+load("Pro_TNBC/output/data/scRNASeq/26_sample/GSE176078_scRNA.RData")
+load("Pro_TNBC/output/data/scRNASeq/26_sample/top100.gene/top100_gene.RData")
 ######################################################################################################################
-#   Fig 1:Development of UBS93 gene panel.
+#  Fig 1:Development of UBS93 gene panel.
 ######################################################################################################################
 
-####fig 1b: Box plot of the mean values of TOP100 gene in different cell types of CID3963.####
+#### fig 1b: Box plot of the mean values of TOP100 gene in different cell types of CID3963.####
 #CID3963(ER+)#
+CID3963_scRNA                       <- subset(GSE176078_scRNA,orig.ident=="CID3963")
+CID3963_scRNA[["percent.mt"]]       <- PercentageFeatureSet(CID3963_scRNA,pattern = "^MT-")
+VlnPlot(CID3963_scRNA,features = c("nCount_RNA","nFeature_RNA","percent.mt"),ncol=3)
+CID3963_scRNA                       <- subset(CID3963_scRNA,nFeature_RNA >0 & nFeature_RNA<4000&percent.mt <20 )
+#normalized
+CID3963_scRNA                       <- NormalizeData(CID3963_scRNA,normalization.method="RC")
+CID3963_exprmat_CPM                 <- as.matrix(CID3963_scRNA@assays$RNA@data)#data after normalizing
+CID3963_100genelist_exprmat         <- CID3963_exprmat_CPM[rownames(CID3963_exprmat_CPM) %in% top100_gene,]
+gene_mean                           <- apply(CID3963_100genelist_exprmat,2,mean)
+CID3963_100genelistmean_df          <- as.data.frame(gene_mean)
+CID3963_100genelistmean_df$cell.id  <- rownames(CID3963_100genelistmean_df)
+
+metadata                          <- read_csv("Pro_TNBC/data/scRNASeq/26/Wu_etal_2021_BRCA_scRNASeq/metadata.csv")
+CID3963_metadata                  <- metadata[metadata$orig.ident=="CID3963",]
+CID3963                           <- CID3963_metadata[,c(1,9)]
+colnames(CID3963)[1]              <- "cell.id"
+CID3963_100genelistmean_df        <- merge(CID3963_100genelistmean_df,CID3963,by="cell.id")
+write.csv(CID3963_100genelistmean_df,file = "Pro_TNBC/output/data/scRNASeq/26_sample/top100.gene/CID3963_100genelistmean_df.csv")
+
 CID3963_100genelistmean_df        <- read_csv("Pro_TNBC/output/data/scRNASeq/26_sample/top100.gene/CID3963_100genelistmean_df.csv")
 CID3963_100genelistmean_df        <- subset(CID3963_100genelistmean_df,!celltype_major=="Normal Epithelial")
 fig_1b                            <- ggplot(CID3963_100genelistmean_df,aes(x=reorder(celltype_major,gene_mean,decreasing =T),y=gene_mean))+
@@ -57,7 +78,7 @@ ggsave(fig_1c,filename = "Pro_TNBC/paper/plot/section_1/TSNE.of.breast.cancer.ce
 save(tsne_result,file="Pro_TNBC/paper/data/results/section_1/tsne.of.CLLE.RData")
 
 ######################################################################################################################
-#  Fig S1:Scatter plot illustrating the relationship between the average E-M ratio and the rank of 27,719 genes (a), the top 2,720 genes (b), and the top 500 genes (c)
+#  Fig S1: Scatter plot illustrating the relationship between the average E-M ratio and the rank of 27,719 genes (a), the top 2,720 genes (b), and the top 500 genes (c)
 ######################################################################################################################
 source('Pro_TNBC/paper/code/ggplot.style.R')
 library(ggplot2)
@@ -66,7 +87,7 @@ library(readr)
 mean_score                           <- read_csv("Pro_TNBC/output/data/scRNASeq/26_sample/score/mean_score.csv")
 mean_score                           <- mean_score[order(mean_score$S_mean,decreasing = F),]
 mean_score$rank                      <- (1: length(mean_score$S_mean))
-figS1a                              <- ggplot(mean_score,aes(x=rank,y=S_mean))+
+figS1a                               <- ggplot(mean_score,aes(x=rank,y=S_mean))+
   geom_point(size=6,show.legend = F)+ggplot.style+xlab(paste("rank",sep = "\n","(n=27719)"))+ylab("score")+
   scale_x_continuous(limits = c(0, 28000),breaks = seq(0,28000,5000))+
   geom_quantile(data = mean_score, mapping = aes(
@@ -106,6 +127,25 @@ top100_gene                          <- mean_score_500[401:500,]$gene
 ######################################################################################################################
 
 ####*Figure S2a: CID4066(ER+/HER2+)####
+CID4066_scRNA                     <- subset(GSE176078_scRNA,orig.ident=="CID4066")
+CID4066_scRNA[["percent.mt"]]     <- PercentageFeatureSet(CID4066_scRNA,pattern = "^MT-")
+VlnPlot(CID4066_scRNA,features = c("nCount_RNA","nFeature_RNA","percent.mt"),ncol=3)
+CID4066_scRNA                     <- subset(CID4066_scRNA,nFeature_RNA >0 & nFeature_RNA<7000&percent.mt <20 )
+#normalized
+CID4066_scRNA                       <- NormalizeData(CID4066_scRNA,normalization.method ="RC")
+CID4066_exprmat_CPM                 <- as.matrix(CID4066_scRNA@assays$RNA@data)#data after normalizing
+CID4066_100genelist_exprmat         <- CID4066_exprmat_CPM[rownames(CID4066_exprmat_CPM) %in% top100_gene,]
+gene_mean                           <- apply(CID4066_100genelist_exprmat,2,mean)
+CID4066_100genelistmean_df          <- as.data.frame(gene_mean)
+CID4066_100genelistmean_df$cell.id  <- rownames(CID4066_100genelistmean_df)
+
+metadata                         <- read_csv("Pro_TNBC/data/scRNASeq/26/Wu_etal_2021_BRCA_scRNASeq/metadata.csv")
+CID4066_metadata                 <- metadata[metadata$orig.ident=="CID4066",]
+CID4066                          <- CID4066_metadata[,c(1,9)]
+colnames(CID4066)[1]             <- "cell.id"
+CID4066_100genelistmean_df       <- merge(CID4066_100genelistmean_df,CID4066,by="cell.id")
+write.csv(CID4066_100genelistmean_df,file = "Pro_TNBC/output/data/scRNASeq/26_sample/top100.gene/CID4066_100genelistmean_df.csv")
+
 CID4066_100genelistmean_df       <- read_csv("Pro_TNBC/output/data/scRNASeq/26_sample/top100.gene/CID4066_100genelistmean_df.csv")
 CID4066_100genelistmean_df       <- subset(CID4066_100genelistmean_df,celltype_major!="Normal Epithelial")
 supfig_2a                        <- ggplot(CID4066_100genelistmean_df,aes(x=reorder(celltype_major,gene_mean,decreasing=T),y=gene_mean))+
@@ -119,6 +159,25 @@ supfig_2a                        <- ggplot(CID4066_100genelistmean_df,aes(x=reor
 ggsave(supfig_2a,filename = "Pro_TNBC/paper/plot/section_1/Box.plot.of.the.mean.values.of.gene.panel.in.different.celltypes.of.CID4066.pdf",height = 15,width = 20)
 
 ####*Figure S2b: CID4495(TNBC)####
+CID4495_scRNA                       <- subset(GSE176078_scRNA,orig.ident=="CID4495")
+CID4495_scRNA[["percent.mt"]]       <- PercentageFeatureSet(CID4495_scRNA,pattern = "^MT-")
+VlnPlot(CID4495_scRNA,features = c("nCount_RNA","nFeature_RNA","percent.mt"),ncol=3)
+CID4495_scRNA                       <- subset(CID4495_scRNA,nFeature_RNA >0 & nFeature_RNA<7000&percent.mt <20 )
+#normalized
+CID4495_scRNA                       <- NormalizeData(CID4495_scRNA,normalization.method ="RC")
+CID4495_exprmat_CPM                 <- as.matrix(CID4495_scRNA@assays$RNA@data)#data after normalizing
+CID4495_100genelist_exprmat         <- CID4495_exprmat_CPM[rownames(CID4495_exprmat_CPM) %in% top100_gene,]
+gene_mean                           <- apply(CID4495_100genelist_exprmat,2,mean)
+CID4495_100genelistmean_df          <- as.data.frame(gene_mean)
+CID4495_100genelistmean_df$cell.id  <- rownames(CID4495_100genelistmean_df)
+
+metadata                            <- read_csv("Pro_TNBC/data/scRNASeq/26/Wu_etal_2021_BRCA_scRNASeq/metadata.csv")
+CID4495_metadata                    <- metadata[metadata$orig.ident=="CID4495",]
+CID4495                             <- CID4495_metadata[,c(1,9)]
+colnames(CID4495)[1]                <- "cell.id"
+CID4495_100genelistmean_df          <- merge(CID4495_100genelistmean_df,CID4495,by="cell.id")
+write.csv(CID4495_100genelistmean_df,file = "Pro_TNBC/output/data/scRNASeq/26_sample/top100.gene/CID4495_100genelistmean_df.csv")
+
 CID4495_100genelistmean_df       <- read_csv("Pro_TNBC/output/data/scRNASeq/26_sample/top100.gene/CID4495_100genelistmean_df.csv")
 supfig_2b                        <- ggplot(CID4495_100genelistmean_df,aes(x=reorder(celltype_major,gene_mean,decreasing=T),y=gene_mean))+
   geom_boxplot(width=0.6,alpha=0.8)+ggplot.style + 
@@ -131,9 +190,26 @@ supfig_2b                        <- ggplot(CID4495_100genelistmean_df,aes(x=reor
 ggsave(supfig_2a,filename = "Pro_TNBC/paper/plot/section_1/Box.plot.of.the.mean.values.of.gene.panel.in.different.celltypes.of.CID4495.pdf",height = 15,width = 20)
 
 ####*Figure S2c: CID45171(HER2+)####
-library(ggplot2)
-library(gridExtra)
-library(cowplot)
+CID45171_scRNA                     <- subset(GSE176078_scRNA,orig.ident=="CID45171")
+CID45171_scRNA[["percent.mt"]]     <- PercentageFeatureSet(CID45171_scRNA,pattern = "^MT-")
+head(CID45171_scRNA@meta.data,5)
+VlnPlot(CID45171_scRNA,features = c("nCount_RNA","nFeature_RNA","percent.mt"),ncol=3)
+CID45171_scRNA                     <- subset(CID45171_scRNA,nFeature_RNA >0 & nFeature_RNA<7000&percent.mt <20 )
+#normalized
+CID45171_scRNA                       <- NormalizeData(CID45171_scRNA,normalization.method ="RC")
+CID45171_exprmat_CPM                 <- as.matrix(CID45171_scRNA@assays$RNA@data)#data after normalizing
+CID45171_100genelist_exprmat         <- CID45171_exprmat_CPM[rownames(CID45171_exprmat_CPM) %in% top100_gene,]
+gene_mean                            <- apply(CID45171_100genelist_exprmat,2,mean)
+CID45171_100genelistmean_df          <- as.data.frame(gene_mean)
+CID45171_100genelistmean_df$cell.id  <- rownames(CID45171_100genelistmean_df)
+
+metadata                <- read_csv("Pro_TNBC/data/scRNASeq/26/Wu_etal_2021_BRCA_scRNASeq/metadata.csv")
+CID45171_metadata        <- metadata[metadata$orig.ident=="CID45171",]
+CID45171                 <- CID45171_metadata[,c(1,9)]
+colnames(CID45171)[1]    <- "cell.id"
+CID45171_100genelistmean_df <- merge(CID45171_100genelistmean_df,CID45171,by="cell.id")
+write.csv(CID45171_100genelistmean_df,file = "Pro_TNBC/output/data/scRNASeq/26_sample/top100.gene/CID45171_100genelistmean_df.csv")
+
 CID45171_100genelistmean_df      <- read_csv("Pro_TNBC/output/data/scRNASeq/26_sample/top100.gene/CID45171_100genelistmean_df.csv")
 supfig_2c                        <- ggplot(CID45171_100genelistmean_df,aes(x=reorder(celltype_major,gene_mean,decreasing=T),y=gene_mean))+
   geom_boxplot(width=0.6,alpha=0.8)+ggplot.style + 
@@ -160,8 +236,6 @@ brca_info                  <- brca_info[brca_info$primary_disease=="Breast Cance
 brca_info                  <- subset(brca_info,lineage_molecular_subtype!="luminal_HER2_amp")
 brca.ccle.log2.rpkm        <- CCLE.log2.rpkm.matrix[,colnames(CCLE.log2.rpkm.matrix) %in% brca_info$CCLE_Name]
 
-
-load("Pro_TNBC/output/data/scRNASeq/26_sample/top100.gene/top100_gene.RData")
 brca.ccle.log2.rpkm.genecov             <- as.data.frame(brca.ccle.log2.rpkm)
 brca.ccle.log2.rpkm.genecov$ENSEMBL     <- rownames(brca.ccle.log2.rpkm.genecov)
 symbol                                  <- bitr(brca.ccle.log2.rpkm.genecov$ENSEMBL, fromType="ENSEMBL", toType="SYMBOL", OrgDb="org.Hs.eg.db")
