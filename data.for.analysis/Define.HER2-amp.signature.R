@@ -30,7 +30,7 @@ horl_subgroup                              <- data.frame(group=horl_subgroup[,-1
 rownames(horl_subgroup)                    <- rown
 
 HorL_readcount                             <- HorL_readcount[,match(rownames(horl_subgroup),colnames(HorL_readcount))]
-all(rownames(horl_subgroup) == colnames(HorL_readcount))#检查count文件和colData文件中的样本顺序是否一致
+all(rownames(horl_subgroup) == colnames(HorL_readcount))
 
 #Specify sample grouping information
 group                         <- as.factor(horl_subgroup$group)
@@ -49,8 +49,6 @@ head(res)
 res[which(res$log2FoldChange >= 1 & res$padj < 0.05),'sig']          <- 'up'
 res[which(res$log2FoldChange <= -1 & res$padj < 0.05),'sig']         <- 'down'
 res [which(abs(res$log2FoldChange) <= 1 | res$padj >= 0.05),'sig']   <- 'none'
-de_res                                  <- as.data.frame(res)
-write.csv(de_res,file = "Pro_TNBC/output/data/CCLE/CCLE.HER2.amp.up.and.down.genelist.csv")
 #Output differential gene summary table
 diff_gene_deseq2_horl_subgroup          <- subset(res, sig %in% c('up', 'down')) %>% as.data.frame()
 load("~/Pro_TNBC/output/data/CCLE/UBS93.Rpackage/UBS93.gene.df.RData")
@@ -59,3 +57,4 @@ diff_gene_deseq2_horl_subgroup          <- merge(diff_gene_deseq2_horl_subgroup,
 write.csv(diff_gene_deseq2_horl_subgroup,file="Pro_TNBC/output/data/CCLE/diff_gene_deseq2_horl_subgroup.csv")
 h_up_l_gene                             <- subset(diff_gene_deseq2_horl_subgroup,sig=="up")
 HER2_amp_signature                      <- h_up_l_gene$ENSEMBL
+save(HER2_amp_signature,file="Pro_TNBC/paper/data/method/HER2_amp_signature.RData")
