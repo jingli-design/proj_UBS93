@@ -28,7 +28,7 @@ save(UBS93_pam50_score,file="Pro_TNBC/paper/data/section_3/fig3a.UBS93.pam50.sco
 library(ggplot2)
 library(gridExtra)
 library(cowplot)
-CID3963_UBS93genelist_exprmat         <- CID3963_exprmat_CPM[rownames(CID3963_exprmat_CPM) %in% BCT93.gene.df$SYMBOL,]
+CID3963_UBS93genelist_exprmat         <- CID3963_exprmat_CPM[rownames(CID3963_exprmat_CPM) %in% UBS93.gene.df$SYMBOL,]
 gene_mean                             <- apply(CID3963_UBS93genelist_exprmat,2,mean)
 CID3963_UBS93genelistmean_df          <- as.data.frame(gene_mean)
 CID3963_UBS93genelistmean_df$cell.id  <- rownames(CID3963_UBS93genelistmean_df)
@@ -76,7 +76,7 @@ wilcox.test(gene_mean~celltype_major,data = CID3963_PAM50)
 library(ggplot2)
 library(gridExtra)
 library(cowplot)
-CID4495_UBS93genelist_exprmat         <- CID4495_exprmat_CPM[rownames(CID4495_exprmat_CPM) %in% BCT93.gene.df$SYMBOL,]
+CID4495_UBS93genelist_exprmat         <- CID4495_exprmat_CPM[rownames(CID4495_exprmat_CPM) %in% UBS93.gene.df$SYMBOL,]
 gene_mean                             <- apply(CID4495_UBS93genelist_exprmat,2,mean)
 CID4495_UBS93genelistmean_df          <- as.data.frame(gene_mean)
 CID4495_UBS93genelistmean_df$cell.id  <- rownames(CID4495_UBS93genelistmean_df)
@@ -123,7 +123,7 @@ wilcox.test(gene_mean~celltype_major,data = CID4495_PAM50)
 library(ggplot2)
 library(gridExtra)
 library(cowplot)
-CID4066_UBS93genelist_exprmat         <- CID4066_exprmat_CPM[rownames(CID4066_exprmat_CPM) %in% BCT93.gene.df$SYMBOL,]
+CID4066_UBS93genelist_exprmat         <- CID4066_exprmat_CPM[rownames(CID4066_exprmat_CPM) %in% UBS93.gene.df$SYMBOL,]
 gene_mean                             <- apply(CID4066_UBS93genelist_exprmat,2,mean)
 CID4066_UBS93genelistmean_df          <- as.data.frame(gene_mean)
 CID4066_UBS93genelistmean_df$cell.id  <- rownames(CID4066_UBS93genelistmean_df)
@@ -170,7 +170,7 @@ wilcox.test(gene_mean~celltype_major,data = CID4066_PAM50)
 library(ggplot2)
 library(gridExtra)
 library(cowplot)
-CID45171_UBS93genelist_exprmat         <- CID45171_exprmat_CPM[rownames(CID45171_exprmat_CPM) %in% BCT93.gene.df$SYMBOL,]
+CID45171_UBS93genelist_exprmat         <- CID45171_exprmat_CPM[rownames(CID45171_exprmat_CPM) %in% UBS93.gene.df$SYMBOL,]
 gene_mean                              <- apply(CID45171_UBS93genelist_exprmat,2,mean)
 CID45171_UBS93genelistmean_df          <- as.data.frame(gene_mean)
 CID45171_UBS93genelistmean_df$cell.id  <- rownames(CID45171_UBS93genelistmean_df)
