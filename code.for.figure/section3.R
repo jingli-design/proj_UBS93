@@ -38,8 +38,6 @@ CID3963_metadata                      <- metadata[metadata$orig.ident=="CID3963"
 CID3963                               <- CID3963_metadata[,c(1,9)]
 colnames(CID3963)[1]                  <- "cell.id"
 CID3963_UBS93genelistmean_df          <- merge(CID3963_UBS93genelistmean_df,CID3963,by="cell.id")
-library(ggplot2)
-ggplot(CID3963_UBS93genelistmean_df,aes(x=celltype_major,y=gene_mean))+geom_boxplot()
 write.csv(CID3963_UBS93genelistmean_df,file = "Pro_TNBC/output/data/scRNASeq/26_sample/UBS93.gene/CID3963_UBS93genelistmean_df.csv")
 
 CID3963_UBS93genelistmean_df   <- read_csv("Pro_TNBC/output/data/scRNASeq/26_sample/UBS93.gene/CID3963_UBS93genelistmean_df.csv")
@@ -48,16 +46,15 @@ CID3963_pam50genelistmean_df   <- read_csv(file = "Pro_TNBC/output/data/scRNASeq
 CID3963_pam50genelistmean_df   <- CID3963_pam50genelistmean_df %>% mutate(gene_panel="PAM50")
 CID3963_genelistmean_df        <- rbind(CID3963_UBS93genelistmean_df,CID3963_pam50genelistmean_df)
 CID3963_genelistmean_df        <- subset(CID3963_genelistmean_df,!celltype_major=="Normal Epithelial")
-fig_3b                         <- ggplot(CID3963_genelistmean_df,aes(x=reorder(celltype_major,gene_mean,decreasing =T),y=gene_mean,fill=gene_panel))+
-  geom_boxplot(width=0.6,alpha=0.8,position=position_dodge(0.8))+ggplot.style + 
-  theme(axis.text  = element_text( size=27, face="bold"),plot.title = element_text(size = 55,hjust=0.5))+
-  scale_fill_manual(values =c(PAM50="#FF66FF",UBS93="#FF9900"))+
-  geom_point(size=1,position = position_jitterdodge(dodge.width=0.8))+
-  theme(panel.grid.major=element_line(colour=NA),
-        panel.grid.minor = element_blank())+xlab("Celltype")+ylab("Expression")+
-  scale_x_discrete("Celltype", labels = c("Cancer Epithelial" = paste("Cancer cell",sep = "\n","(n=195)"),"CAFs" = paste("CAF",sep = "\n","(n=23)"),"Myeloid" = paste("Myeloid",sep = "\n","(n=474)"),"PVL" = paste("PVL",sep = "\n","(n=28)"),"T-cells" = paste("T-cells",sep = "\n","(n=2672)"),"Endothelial" = paste("Endothelial",sep = "\n","(n=102)")))
+CID3963_genelistmean_df$celltype_major    <- factor(CID3963_genelistmean_df$celltype_major,levels = c("Cancer Epithelial","CAFs","Myeloid","PVL","T-cells","Endothelial"))
+fig_3b                         <- ggboxplot(CID3963_genelistmean_df,x = "celltype_major",y="gene_mean",color = "gene_panel",add = "point",size= 1,add.params=list(size=1))+ 
+                                  ggplot.style+
+                                  scale_color_manual(values =c(PAM50="blue",UBS93="red"))+
+                                  theme(panel.grid.major=element_line(colour=NA),
+                                  panel.grid.minor = element_blank())+xlab("Celltype")+ylab("Expression")+
+                                  scale_x_discrete("Celltype", labels = c("Cancer Epithelial" = paste("Cancer cell",sep = "\n","(n=195)"),"CAFs" = paste("CAF",sep = "\n","(n=23)"),"Myeloid" = paste("Myeloid",sep = "\n","(n=474)"),"PVL" = paste("PVL",sep = "\n","(n=28)"),"T-cells" = paste("T-cells",sep = "\n","(n=2672)"),"Endothelial" = paste("Endothelial",sep = "\n","(n=102)")))
 ggsave(fig_3b,filename = "Pro_TNBC/paper/plot/section_3/Box.plot.of.the.mean.values.of.gene.panel.in.different.celltypes.of.CID3963.pdf",height = 15,width = 25)
-save(CID3963_genelistmean_df,file = "Pro_TNBC/paper/data/section_3/fig1b2.CID3963.genelistmean.RData")
+save(CID3963_genelistmean_df,file = "Pro_TNBC/paper/data/results/section_3/fig1b2.CID3963.genelistmean.RData")
 
 #Wilcoxon Signed Rank Test
 cell_groups               <- names(table(CID3963_genelistmean_df$celltype_major))
@@ -69,8 +66,8 @@ for (i in 1:length(cell_groups)) {
   results                 <- rbind(results, result_row)
 }
 
-CID3963_PAM50  <- subset(CID3963_genelistmean_df,gene_panel=="PAM50_gene")
-CID3963_PAM50  <- subset(CID3963_PAM50,celltype_major=="CAFs"|celltype_major=="Cancer Epithelial")
+CID3963_PAM50             <- subset(CID3963_genelistmean_df,gene_panel=="PAM50_gene")
+CID3963_PAM50             <- subset(CID3963_PAM50,celltype_major=="CAFs"|celltype_major=="Cancer Epithelial")
 wilcox.test(gene_mean~celltype_major,data = CID3963_PAM50)
 #p = 0.1274
 
@@ -88,9 +85,7 @@ metadata                <- read_csv("Pro_TNBC/data/scRNASeq/26/Wu_etal_2021_BRCA
 CID4495_metadata        <- metadata[metadata$orig.ident=="CID4495",]
 CID4495                 <- CID4495_metadata[,c(1,9)]
 colnames(CID4495)[1]    <- "cell.id"
-CID4495_UBS93genelistmean_df <- merge(CID4495_UBS93genelistmean_df,CID4495,by="cell.id")
-library(ggplot2)
-ggplot(CID4495_UBS93genelistmean_df,aes(x=celltype_major,y=gene_mean))+geom_boxplot()
+CID4495_UBS93genelistmean_df           <- merge(CID4495_UBS93genelistmean_df,CID4495,by="cell.id")
 write.csv(CID4495_UBS93genelistmean_df,file = "Pro_TNBC/output/data/scRNASeq/26_sample/UBS93.gene/CID4495_UBS93genelistmean_df.csv")
 
 CID4495_UBS93genelistmean_df   <- read_csv("Pro_TNBC/output/data/scRNASeq/26_sample/UBS93.gene/CID4495_UBS93genelistmean_df.csv")
@@ -99,16 +94,15 @@ CID4495_pam50genelistmean_df   <- read_csv(file = "Pro_TNBC/output/data/scRNASeq
 CID4495_pam50genelistmean_df   <- CID4495_pam50genelistmean_df %>% mutate(gene_panel="PAM50")
 CID4495_genelistmean_df        <- rbind(CID4495_UBS93genelistmean_df,CID4495_pam50genelistmean_df)
 CID4495_genelistmean_df        <- subset(CID4495_genelistmean_df,!celltype_major=="Normal Epithelial")
-supfig_8a                        <- ggplot(CID4495_genelistmean_df,aes(x=reorder(celltype_major,gene_mean,decreasing =T),y=gene_mean,fill=gene_panel))+
-  geom_boxplot(width=0.6,alpha=0.8,position=position_dodge(0.8))+ggplot.style + 
-  theme(axis.text  = element_text( size=27, face="bold"),plot.title = element_text(size = 55,hjust=0.5))+
-  scale_fill_manual(values =c(PAM50="#FF66FF",UBS93="#FF9900"))+
-  geom_point(size=0.5,position = position_jitterdodge(dodge.width=0.8))+
-  theme(panel.grid.major=element_line(colour=NA),
-        panel.grid.minor = element_blank())+xlab("Celltype")+ylab("Expression")+
-  scale_x_discrete("Celltype", labels = c("Cancer Epithelial" = paste("Cancer cell",sep = "\n","(n=1177)"),"CAFs" = paste("CAF",sep = "\n","(n=232)"),"Myeloid" = paste("Myeloid",sep = "\n","(n=897)"),"PVL" = paste("PVL",sep = "\n","(n=191)"),"T-cells" = paste("T-cells",sep = "\n","(n=3504)"),"Endothelial" = paste("Endothelial",sep = "\n","(n=184)"),"B-cells"=paste("B-cells",sep = "\n","(n=773)"),"Plasmablasts"=paste("Plasmablasts",sep = "\n","(n=1020)")))
+CID4495_genelistmean_df$celltype_major      <- factor(CID4495_genelistmean_df$celltype_major,levels = c("Cancer Epithelial","CAFs","Myeloid","PVL","T-cells","Endothelial","B-cells","Plasmablasts"))
+supfig_8a                      <- ggboxplot(CID4495_genelistmean_df,x = "celltype_major",y="gene_mean",color = "gene_panel",add = "point",size= 1,add.params=list(size=1))+ 
+                                  ggplot.style+
+                                  scale_color_manual(values =c(PAM50="blue",UBS93="red"))+
+                                  theme(panel.grid.major=element_line(colour=NA),
+                                  panel.grid.minor = element_blank())+xlab("Celltype")+ylab("Expression")+
+                                  scale_x_discrete("Celltype", labels = c("Cancer Epithelial" = paste("Cancer cell",sep = "\n","(n=1177)"),"CAFs" = paste("CAF",sep = "\n","(n=232)"),"Myeloid" = paste("Myeloid",sep = "\n","(n=897)"),"PVL" = paste("PVL",sep = "\n","(n=191)"),"T-cells" = paste("T-cells",sep = "\n","(n=3504)"),"Endothelial" = paste("Endothelial",sep = "\n","(n=184)"),"B-cells"=paste("B-cells",sep = "\n","(n=773)"),"Plasmablasts"=paste("Plasmablasts",sep = "\n","(n=1020)")))
 ggsave(supfig_8a,filename = "Pro_TNBC/paper/plot/section_3/Box.plot.of.the.mean.values.of.gene.panel.in.different.celltypes.of.CID4495.pdf",height = 15,width = 25)
-save(CID4495_genelistmean_df,file = "Pro_TNBC/paper/data/section_3/fig1b2.CID4495.genelistmean.RData")
+save(CID4495_genelistmean_df,file = "Pro_TNBC/paper/data/results/section_3/fig1b2.CID4495.genelistmean.RData")
 
 #Wilcoxon Signed Rank Test
 cell_groups               <- names(table(CID4495_genelistmean_df$celltype_major))
@@ -120,8 +114,8 @@ for (i in 1:length(cell_groups)) {
   results                 <- rbind(results, result_row)
 }
 
-CID4495_PAM50 <- subset(CID4495_genelistmean_df,gene_panel=="PAM50_gene")
-CID4495_PAM50 <- subset(CID4495_PAM50,celltype_major=="CAFs"|celltype_major=="Cancer Epithelial")
+CID4495_PAM50             <- subset(CID4495_genelistmean_df,gene_panel=="PAM50_gene")
+CID4495_PAM50             <- subset(CID4495_PAM50,celltype_major=="CAFs"|celltype_major=="Cancer Epithelial")
 wilcox.test(gene_mean~celltype_major,data = CID4495_PAM50)
 #p-value = 6.536e-10
 
@@ -139,8 +133,6 @@ CID4066_metadata        <- metadata[metadata$orig.ident=="CID4066",]
 CID4066                 <- CID4066_metadata[,c(1,9)]
 colnames(CID4066)[1]    <- "cell.id"
 CID4066_UBS93genelistmean_df <- merge(CID4066_UBS93genelistmean_df,CID4066,by="cell.id")
-library(ggplot2)
-ggplot(CID4066_UBS93genelistmean_df,aes(x=celltype_major,y=gene_mean))+geom_boxplot()
 write.csv(CID4066_UBS93genelistmean_df,file = "Pro_TNBC/output/data/scRNASeq/26_sample/UBS93.gene/CID4066_UBS93genelistmean_df.csv")
 
 CID4066_UBS93genelistmean_df   <- read_csv("Pro_TNBC/output/data/scRNASeq/26_sample/UBS93.gene/CID4066_UBS93genelistmean_df.csv")
@@ -149,16 +141,15 @@ CID4066_pam50genelistmean_df   <- read_csv(file = "Pro_TNBC/output/data/scRNASeq
 CID4066_pam50genelistmean_df   <- CID4066_pam50genelistmean_df %>% mutate(gene_panel="PAM50")
 CID4066_genelistmean_df        <- rbind(CID4066_UBS93genelistmean_df,CID4066_pam50genelistmean_df)
 CID4066_genelistmean_df        <- subset(CID4066_genelistmean_df,!celltype_major=="Normal Epithelial")
-supfig_8b                      <- ggplot(CID4066_genelistmean_df,aes(x=reorder(celltype_major,gene_mean,decreasing =T),y=gene_mean,fill=gene_panel))+
-  geom_boxplot(width=0.6,alpha=0.8,position=position_dodge(0.8))+ggplot.style + 
-  theme(axis.text  = element_text( size=27, face="bold"),plot.title = element_text(size = 55,hjust=0.5))+
-  scale_fill_manual(values =c(PAM50="#FF66FF",UBS93="#FF9900"))+
-  geom_point(size=0.5,position = position_jitterdodge(dodge.width=0.8))+
-  theme(panel.grid.major=element_line(colour=NA),
-        panel.grid.minor = element_blank())+xlab("Celltype")+ylab("Expression")+
-  scale_x_discrete("Celltype", labels = c("Cancer Epithelial" = paste("Cancer cell",sep = "\n","(n=514)"),"CAFs" = paste("CAF",sep = "\n","(n=923)"),"Myeloid" = paste("Myeloid",sep = "\n","(n=221)"),"PVL" = paste("PVL",sep = "\n","(n=630)"),"T-cells" = paste("T-cells",sep = "\n","(n=2171)"),"Endothelial" = paste("Endothelial",sep = "\n","(n=535)"),"B-cells"=paste("B-cells",sep = "\n","(n=38)")))
+CID4066_genelistmean_df$celltype_major     <- factor(CID4066_genelistmean_df$celltype_major,levels = c("Cancer Epithelial","CAFs","Myeloid","PVL","T-cells","Endothelial","B-cells"))
+supfig_8b                      <- ggboxplot(CID4495_genelistmean_df,x = "celltype_major",y="gene_mean",color = "gene_panel",add = "point",size= 1,add.params=list(size=1))+ 
+                                  ggplot.style+
+                                  scale_color_manual(values =c(PAM50="blue",UBS93="red"))+
+                                  theme(panel.grid.major=element_line(colour=NA),
+                                  panel.grid.minor = element_blank())+xlab("Celltype")+ylab("Expression")+
+                                  scale_x_discrete("Celltype", labels = c("Cancer Epithelial" = paste("Cancer cell",sep = "\n","(n=514)"),"CAFs" = paste("CAF",sep = "\n","(n=923)"),"Myeloid" = paste("Myeloid",sep = "\n","(n=221)"),"PVL" = paste("PVL",sep = "\n","(n=630)"),"T-cells" = paste("T-cells",sep = "\n","(n=2171)"),"Endothelial" = paste("Endothelial",sep = "\n","(n=535)"),"B-cells"=paste("B-cells",sep = "\n","(n=38)")))
 ggsave(supfig_8b,filename = "Pro_TNBC/paper/plot/section_3/Box.plot.of.the.mean.values.of.gene.panel.in.different.celltypes.of.CID4066.pdf",height = 15,width = 25)
-save(CID4066_genelistmean_df,file = "Pro_TNBC/paper/data/section_3/fig1b2.CID4066.genelistmean.RData")
+save(CID4066_genelistmean_df,file = "Pro_TNBC/paper/data/results/section_3/fig1b2.CID4066.genelistmean.RData")
 
 #Wilcoxon Signed Rank Test
 cell_groups               <- names(table(CID4066_genelistmean_df$celltype_major))
@@ -169,8 +160,8 @@ for (i in 1:length(cell_groups)) {
   result_row              <- data.frame(CellType = cell_groups[i], p.value = p_value$p.value, stringsAsFactors = FALSE)
   results                 <- rbind(results, result_row)}
 
-CID4066_PAM50 <- subset(CID4066_genelistmean_df,gene_panel=="PAM50_gene")
-CID4066_PAM50 <- subset(CID4066_PAM50,celltype_major=="CAFs"|celltype_major=="Cancer Epithelial")
+CID4066_PAM50             <- subset(CID4066_genelistmean_df,gene_panel=="PAM50_gene")
+CID4066_PAM50             <- subset(CID4066_PAM50,celltype_major=="CAFs"|celltype_major=="Cancer Epithelial")
 wilcox.test(gene_mean~celltype_major,data = CID4066_PAM50)
 #p-value < 2.2e-16
 
@@ -189,8 +180,6 @@ CID45171_metadata        <- metadata[metadata$orig.ident=="CID45171",]
 CID45171                 <- CID45171_metadata[,c(1,9)]
 colnames(CID45171)[1]    <- "cell.id"
 CID45171_UBS93genelistmean_df           <- merge(CID45171_UBS93genelistmean_df,CID45171,by="cell.id")
-library(ggplot2)
-ggplot(CID45171_UBS93genelistmean_df,aes(x=celltype_major,y=gene_mean))+geom_boxplot()
 write.csv(CID45171_UBS93genelistmean_df,file = "Pro_TNBC/output/data/scRNASeq/26_sample/UBS93.gene/CID45171_UBS93genelistmean_df.csv")
 
 CID45171_UBS93genelistmean_df   <- read_csv("Pro_TNBC/output/data/scRNASeq/26_sample/UBS93.gene/CID45171_UBS93genelistmean_df.csv")
@@ -199,14 +188,13 @@ CID45171_pam50genelistmean_df   <- read_csv(file = "Pro_TNBC/output/data/scRNASe
 CID45171_pam50genelistmean_df   <- CID45171_pam50genelistmean_df %>% mutate(gene_panel="PAM50")
 CID45171_genelistmean_df        <- rbind(CID45171_UBS93genelistmean_df,CID45171_pam50genelistmean_df)
 CID45171_genelistmean_df        <- subset(CID45171_genelistmean_df,!celltype_major=="Normal Epithelial")
-supfig_8c                       <- ggplot(CID45171_genelistmean_df,aes(x=reorder(celltype_major,gene_mean,decreasing =T),y=gene_mean,fill=gene_panel))+
-  geom_boxplot(width=0.6,alpha=0.8,position=position_dodge(0.8))+ggplot.style + 
-  theme(axis.text  = element_text( size=27, face="bold"),plot.title = element_text(size = 55,hjust=0.5))+
-  scale_fill_manual(values =c(PAM50="#FF66FF",UBS93="#FF9900"))+
-  geom_point(size=0.5,position = position_jitterdodge(dodge.width=0.8))+
-  theme(panel.grid.major=element_line(colour=NA),
-        panel.grid.minor = element_blank())+xlab("Celltype")+ylab("Expression")+
-  scale_x_discrete("Celltype", labels = c("Cancer Epithelial" = paste("Cancer cell",sep = "\n","(n=805)"),"CAFs" = paste("CAF",sep = "\n","(n=32)"),"Myeloid" = paste("Myeloid",sep = "\n","(n=172)"),"PVL" = paste("PVL",sep = "\n","(n=13)"),"T-cells" = paste("T-cells",sep = "\n","(n=1346)"),"Endothelial" = paste("Endothelial",sep = "\n","(n=15)"),"B-cells"=paste("B-cells",sep = "\n","(n=56)")))
+CID45171_genelistmean_df$celltype_major     <- factor(CID45171_genelistmean_df$celltype_major,levels = c("Cancer Epithelial","CAFs","Myeloid","PVL","T-cells","Endothelial","B-cells"))
+supfig_8c                       <- ggboxplot(CID4495_genelistmean_df,x = "celltype_major",y="gene_mean",color = "gene_panel",add = "point",size= 1,add.params=list(size=1))+ 
+                                   ggplot.style+
+                                   scale_color_manual(values =c(PAM50="blue",UBS93="red"))+
+                                   theme(panel.grid.major=element_line(colour=NA),
+                                   panel.grid.minor = element_blank())+xlab("Celltype")+ylab("Expression")+
+                                   scale_x_discrete("Celltype", labels = c("Cancer Epithelial" = paste("Cancer cell",sep = "\n","(n=805)"),"CAFs" = paste("CAF",sep = "\n","(n=32)"),"Myeloid" = paste("Myeloid",sep = "\n","(n=172)"),"PVL" = paste("PVL",sep = "\n","(n=13)"),"T-cells" = paste("T-cells",sep = "\n","(n=1346)"),"Endothelial" = paste("Endothelial",sep = "\n","(n=15)"),"B-cells"=paste("B-cells",sep = "\n","(n=56)")))
 ggsave(supfig_8c,filename = "Pro_TNBC/paper/plot/section_3/Box.plot.of.the.mean.values.of.gene.panel.in.different.celltypes.of.CID45171.pdf",height = 15,width = 25)
 save(CID45171_genelistmean_df,file = "Pro_TNBC/paper/data/section_3/fig1b2.CID45171.genelistmean.RData")
 
@@ -220,8 +208,8 @@ for (i in 1:length(cell_groups)) {
   results                 <- rbind(results, result_row)
 }
 
-CID45171_PAM50 <- subset(CID45171_genelistmean_df,gene_panel=="PAM50_gene")
-CID45171_PAM50 <- subset(CID45171_PAM50,celltype_major=="CAFs"|celltype_major=="Cancer Epithelial")
+CID45171_PAM50            <- subset(CID45171_genelistmean_df,gene_panel=="PAM50_gene")
+CID45171_PAM50            <- subset(CID45171_PAM50,celltype_major=="CAFs"|celltype_major=="Cancer Epithelial")
 wilcox.test(gene_mean~celltype_major,data = CID45171_PAM50)
 p-value = 0.0372
 
@@ -234,7 +222,7 @@ p-value = 0.0372
 
 ####3.2.1: compare the genefu predicting and UBS93 predicting with bulk RNAseq data of humnan cell lines(fig_3c)####
 ####*GSE212143####
-####pam50 subtyping
+#####*pam50 subtyping#
 library(genefu)
 library(dplyr)
 data("pam50")
@@ -252,7 +240,7 @@ pam50.subtype                  <- intrinsic.cluster.predict(sbt.model = pam50,da
 GSE212143.pam50.subtype                 <- pam50.subtype["subtype"] %>% as.data.frame()
 GSE212143.pam50.subtype$run_accession   <- rownames(GSE212143.pam50.subtype)
 
-####*Claudin low typing#
+#####*Claudin low typing#
 library(genefu)
 data(claudinLowData)
 test                      <- GSE212143.log2tpm
@@ -277,7 +265,7 @@ GSE212143.all.subtype     <- merge(GSE212143.pam50.subtype,results,by="run_acces
 GSE212143.all.subtype     <- merge(GSE212143.all.subtype,GSE212143.subtype,by="run_accession")
 GSE212143.all.subtype     <- GSE212143.all.subtype[,c(1:3,6:8,4:5,9:11)]
 
-####**GSE48213####
+####*GSE48213####
 #####*pam50  subtyping#
 library(genefu)
 library(dplyr)
@@ -296,7 +284,7 @@ pam50.subtype                  <- intrinsic.cluster.predict(sbt.model = pam50,da
 GSE48213.pam50.subtype             <- pam50.subtype["subtype"] %>% as.data.frame()
 GSE48213.pam50.subtype$run_accession   <- rownames(GSE48213.pam50.subtype)
 
-#####*Claudin low typing
+#####*Claudin low typing#
 library(genefu)
 data(claudinLowData)
 test                <- GSE48213_log2tpm
@@ -447,8 +435,8 @@ fig_S9d_HER2                   <- ggplot(HER2_predicting, aes(x = predictor, y =
 ggsave(fig_S9d_HER2,filename = "Pro_TNBC/paper/plot/section_3/fig_S9d_HER2_compear.pdf",height = 15,width = 20)
 
 prediction               <-  data.frame(dataset=c("GSE212143","GSE48213","GSE73526","CCLE","GSE212143","GSE48213","GSE73526","CCLE"),
-                          Frequency=c(0.60,0.741,0.774,0.708,0.933, 0.850, 0.849, 0.958),
-                          predictor=c(rep("PAM50",4),rep("UBS93",4)))
+                                        Frequency=c(0.60,0.741,0.774,0.708,0.933, 0.850, 0.849, 0.958),
+                                        predictor=c(rep("PAM50",4),rep("UBS93",4)))
 fig_3c                   <- ggplot(prediction, aes(x = predictor, y = Frequency))+
   geom_point(size = 6,color='#6600FF') + 
   geom_point(size = 6,shape=21) +  
@@ -456,8 +444,79 @@ fig_3c                   <- ggplot(prediction, aes(x = predictor, y = Frequency)
   labs(x = '', y = 'Frequency')+ggplot.style
 ggsave(fig_3c,filename = "Pro_TNBC/paper/plot/section_3/fig_3c_total_compear.pdf",height = 15,width = 20)
 
+####3.2.2: compare the genefu predicting and UBS93 predicting with bulk RNAseq data of mouse(fig_3c)####
+load("Pro_TNBC/data/mouse/mouse_model/gene.expression.RData")
+GSE157333_log2tpm             <- log2.tpm.matrix
+load("~/Pro_TNBC/data/mouse/mouse_claudin_low_ref/mouse_claudin_low_ref.RData")
+CL_ref_log2tpm                <- log2.tpm.matrix
+identical(rownames(GSE157333_log2tpm),rownames(CL_ref_log2tpm))
+mouse_log2tpm                 <- cbind(GSE157333_log2tpm,CL_ref_log2tpm)
+gene_mart                     <- read.delim("Pro_TNBC/data/mouse/mart_export.txt",sep = ",")
+load("Pro_TNBC/paper/data/results/section_2/mouse.subtype.RData")
+#####PAM50 typing#
+library(genefu)
+library(dplyr)
+data("pam50")
+pam50.gene.df                                         <- read.delim("Pro_TNBC/data/TCGA/TCGA/pam50_entrez_gene_id_and_ensemble_gene_id.txt", stringsAsFactors=FALSE,comment.char = '#') 
+PAM50.mouse.gene                                      <- gene_mart[gene_mart$Gene.stable.ID %in% pam50.gene.df$ensemble.gene.id,]
+PAM50.mouse.gene                                      <- PAM50.mouse.gene[!is.na(PAM50.mouse.gene$Mouse.gene.stable.ID),]
+Mouse_log2tpm_PAM50                                   <- mouse_log2tpm[rownames(mouse_log2tpm) %in% PAM50.mouse.gene$Mouse.gene.stable.ID,]
+Mouse_log2tpm_PAM50                                   <- as.data.frame(Mouse_log2tpm_PAM50)
+Mouse_log2tpm_PAM50$Mouse.gene.stable.ID              <- rownames(Mouse_log2tpm_PAM50)
+Mouse_log2tpm_PAM50                                   <- merge(PAM50.mouse.gene,Mouse_log2tpm_PAM50,by="Mouse.gene.stable.ID")
+rown                                                  <- Mouse_log2tpm_PAM50$Gene.stable.ID
+Mouse_log2tpm_PAM50                                   <- Mouse_log2tpm_PAM50[,-(1:5)] %>% as.matrix()
+rownames(Mouse_log2tpm_PAM50)                         <- rown
+pam50.gene                                            <- pam50.gene.df$ensemble.gene.id %>% as.character#将数字转化成字符,Ensemble ID形式：ENSG00000223972
+colnames(pam50.gene.df)[1]                            <- 'EntrezGene.ID'
+colnames(pam50.gene.df)[2]                            <- 'probe' 
+pam50.gene.df$EntrezGene.ID                           <- as.character(pam50.gene.df$EntrezGene.ID)
 
+sampleID                                              <- colnames(Mouse_log2tpm_PAM50)
+Mouse_log2tpm_PAM50                                   <- Mouse_log2tpm_PAM50[pam50.gene.df$probe %>% as.character,sampleID] %>% t #t函数为转置函数，可以将行转成列，将列转成行#
+annot.matrix                                          <- pam50.gene.df[,1:2] %>% as.matrix#将pam50.gene.df中的第一和二列转化成矩阵
+rownames(annot.matrix)                                <- annot.matrix[,'probe']
+Mouse.pam50.subtype                                   <- intrinsic.cluster.predict(sbt.model = pam50,data = Mouse_log2tpm_PAM50,annot = annot.matrix,mapping=annot.matrix,do.mapping = T)
+table(Mouse.pam50.subtype$subtype)
+Mouse_pam50_subtype                                   <- Mouse.pam50.subtype$subtype %>% as.data.frame()
+Mouse_pam50_subtype$run_accession                     <- rownames(Mouse_pam50_subtype)
+colnames(Mouse_pam50_subtype)[1]                      <- "pam50.subtype"
+mouse.subtype                                         <- merge(Mouse_pam50_subtype,mouse.subtype,by="run_accession")
 
+#####Claudin low typing#
+library(genefu)
+data(claudinLowData)
+train                      <- claudinLowData
+train$xd                   <- medianCtr(train$xd)
+mouse_gene                 <- gene_mart[gene_mart$Mouse.gene.stable.ID %in% rownames(GSE157333_log2tpm),]
+test                       <- mouse_log2tpm[rownames(mouse_log2tpm) %in% mouse_gene$Mouse.gene.stable.ID,] %>% as.data.frame()
+test$Mouse.gene.stable.ID  <- rownames(test)
+test                       <- merge(mouse_gene,test,by="Mouse.gene.stable.ID")
+ENTREZID                   <- bitr(test$Gene.stable.ID,fromType = "ENSEMBL",toType = "ENTREZID",OrgDb="org.Hs.eg.db")
+colnames(ENTREZID)[1]      <- "Gene.stable.ID"
+test                       <- merge(ENTREZID,test,by="Gene.stable.ID")
+rown                       <- test$ENTREZID
+test                       <- test[,-(1:6)]
+# Find duplicate row names
+duplicated_rows             <- duplicated(rown)
+duplicated_indices          <- which(duplicated_rows)
+#Output index of duplicate rows Output index of duplicate rows
+print(duplicated_indices)
+#Delete duplicate row names 
+test                        <- test[-duplicated_indices, ]
+rown                        <- rown[-duplicated_indices]
+rownames(test)              <- rown
+test                        <- as.matrix(test)
+test                        <- medianCtr(test)
+# Generate Predictions
+predout                     <- claudinLow(x=train$xd, classes=as.matrix(train$classes$Group,ncol=1), y=test)
+# Obtain results
+results                     <- cbind(predout$predictions, predout$distances)
+colnames(results)[1]        <- "run_accession"
+mouse.subtype               <- merge(mouse.subtype,results[,1:2],by="run_accession")
+colnames(mouse.subtype)[5]  <- "genefu.cl.subtype"                                    
+mouse.subtype.compare       <- mouse.subtype[,c(1:3,5,4)]
+save(mouse.subtype.compare,file = "Pro_TNBC/paper/data/results/section_3/mouse.subtype.compare.RData")
 
 ##################################################################################
 ##### 3.3 compare UBS93 with SCsubtype using the scRNAseq data of cell lines
@@ -664,10 +723,10 @@ colnames(GSE202771_subtype_result)[1]   <- "Subtype"
 GSE202771_subtype_result$Lum            <- GSE202771_subtype_result$LumA + GSE202771_subtype_result$LumB
 GSE202771_subtype_basal                 <- subset(GSE202771_subtype_result,Subtype=="basal_A")
 GSE202771_subtype_basal$ratio           <- GSE202771_subtype_basal$Basal_SC/GSE202771_subtype_basal$total_numbers
-GSE202771_subtype_luminal                   <- subset(GSE202771_subtype_result,Subtype=="luminal")
-GSE202771_subtype_luminal$ratio             <- GSE202771_subtype_luminal$Lum/GSE202771_subtype_luminal$total_numbers
-GSE202771_subtype                           <- rbind(GSE202771_subtype_basal,GSE202771_subtype_luminal)
-GSE202771_subtype$celllines_name            <- rownames(GSE202771_subtype)
+GSE202771_subtype_luminal               <- subset(GSE202771_subtype_result,Subtype=="luminal")
+GSE202771_subtype_luminal$ratio         <- GSE202771_subtype_luminal$Lum/GSE202771_subtype_luminal$total_numbers
+GSE202771_subtype                       <- rbind(GSE202771_subtype_basal,GSE202771_subtype_luminal)
+GSE202771_subtype$celllines_name        <- rownames(GSE202771_subtype)
 GSE202771_subtype[GSE202771_subtype$Subtype=="basal_A",1]  <- c(rep("Basal",7))
 GSE202771_subtype[GSE202771_subtype$Subtype=="luminal",1]  <- c(rep("Luminal",2))
 GSE202771_SCsubtype_subtype                                <- GSE202771_subtype
@@ -681,15 +740,14 @@ colnames(GSE202771_UBS93_subtype)[1] <- "Subtype"
 GSE202771_subtype                    <- rbind(GSE202771_SCsubtype_subtype,GSE202771_UBS93_subtype)
 colnames(GSE173634_subtype)[1]       <- "Subtype"
 scRNAseq_celllines_compare           <- rbind(GSE173634_subtype,GSE202771_subtype)
-fig_3d                               <- ggplot(scRNAseq_celllines_compare,aes(x=Subtype,y=ratio,color=classify))+
-  geom_boxplot(width=0.6,alpha=1#the transparency 
-               ,position=position_dodge(0.8)#determines the position of the boxes in relation to each other
-               ,outlier.shape = NA)+ggplot.style +
-  scale_color_manual(values =c(SCSubtype="Blue",UBS93="Red"))+
-  geom_point(size=5,position = position_jitterdodge(dodge.width=0.8))+
-  theme(panel.grid.major=element_line(colour=NA),
-        panel.grid.minor = element_blank())+xlab("Subtype")+ylab("Frequency")+
-  scale_x_discrete("Subtype", labels = c("HER2_amp" = paste("HER2_amp",sep = "\n","(n=5)"),"Basal" = paste("Basal",sep = "\n","(n=18)"),"Luminal" = paste("Luminal",sep = "\n","(n=10)")))
+scRNAseq_celllines_compare$Subtype   <- factor(scRNAseq_celllines_compare$Subtype,levels =c("Luminal","HER2_amp","Basal"))
+
+fig_3d     <-   ggboxplot(scRNAseq_celllines_compare,x = "Subtype",y = "ratio",color = "classify",add = "point",size= 1,add.params=list(size=3))+ 
+                ggplot.style+
+                scale_color_manual(values =c(SCSubtype="Blue",UBS93="Red"))+
+                theme(panel.grid.major=element_line(colour=NA),
+                panel.grid.minor = element_blank())+xlab("Subtype")+ylab("Frequency")+
+                scale_x_discrete("Subtype", labels = c("HER2_amp" = paste("HER2_amp",sep = "\n","(n=5)"),"Basal" = paste("Basal",sep = "\n","(n=18)"),"Luminal" = paste("Luminal",sep = "\n","(n=10)")))
 ggsave(fig_3d,filename = "Pro_TNBC/paper/plot/section_3/fig_3d.compare.subtype.pdf",width = 20,height = 15)
 save(scRNAseq_celllines_compare,file = "Pro_TNBC/paper/data/results/section_3/scRNAseq_celllines_compare.RData")
 
@@ -699,6 +757,9 @@ scRNAseq_celllines_compare_HER2      <- subset(scRNAseq_celllines_compare,Subtyp
 wilcox.test( ratio~classify,scRNAseq_celllines_compare_HER2,paired=T)#p-value = 0.125
 scRNAseq_celllines_compare_luminal   <- subset(scRNAseq_celllines_compare,Subtype=="Luminal")
 wilcox.test( ratio~classify,scRNAseq_celllines_compare_luminal,paired=T)#p-value = 0.8457
+
+
+
 
 
 
