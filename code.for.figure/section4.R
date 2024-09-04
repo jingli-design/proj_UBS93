@@ -358,6 +358,9 @@ ggsave(supfig_11e,filename = "Pro_TNBC/paper/plot/section_4/HDQP1_GSE202771/boxp
 ####Figure S13: correlation coefficients between Claudin-low centroid and Claudin-low cells in TNBC 
 #########################################################################################################
 load("Pro_TNBC/paper/data/results/section_4/TNBC/TNBC_CL_cor.RData")
+TNBC_cells                       <- table(TNBC_CL_cor$patient.id)
+TNBC_cells                       <- TNBC_cells[TNBC_cells>20]
+TNBC_CL_cor                      <- TNBC_CL_cor[TNBC_CL_cor$patient.id %in% names(TNBC_cells),]
 fig_1b                           <- ggplot(TNBC_CL_cor,aes(x=reorder(patient.id,Claudin_low,FUN = median),y=Claudin_low))+
   geom_boxplot() + 
   theme(axis.text = element_text(size=12, face="bold",angle = 90),
