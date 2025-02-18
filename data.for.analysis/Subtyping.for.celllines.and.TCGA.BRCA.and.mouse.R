@@ -1,3 +1,7 @@
+####################################################
+####Subtyping for celllines, TCGA BRCA and mouse####
+####################################################
+
 ####the function used to calculate F1 score####
 #pre：classified results predicted
 #y：true classified results
